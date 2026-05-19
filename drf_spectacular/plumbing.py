@@ -944,9 +944,14 @@ def _load_enum_name_overrides(language: str):
     return overrides
 
 
-def list_hash(lst: Any) -> str:
-    return hashlib.sha256(json.dumps(sorted(lst), sort_keys=True, cls=JSONEncoder).encode()).hexdigest()[:16]
+def unwrap_enum_value(value):
+    if isinstance(value, Enum):
+        return value.value
+    return value
 
+def list_hash(lst: Any) -> str:
+    unwrapped_lst = [(unwrap_enum_value(item[0]), unwrap_enum_value(item[1])) for item in lst]
+    return hashlib.sha256(json.dumps(sorted(unwrapped_lst), sort_keys=True, cls=JSONEncoder).encode()).hexdigest()[:16]
 
 def anchor_pattern(pattern: str) -> str:
     if not pattern.startswith('^'):
